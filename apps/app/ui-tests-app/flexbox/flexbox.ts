@@ -15,13 +15,14 @@ export const alignContent = set("alignContent");
 
 let lastSelection = null;
 export function select(args) {
-    console.log("Select: " + args.object);
+    if (lastSelection) {
+        lastSelection.selected = "no";
+        lastSelection.notify({ eventName: "selectedChange", object: lastSelection });
+    }
     lastSelection = args.object;
-
-    if (isAndroid) {
-        let layoutParams = lastSelection.android.getLayoutParams();
-        console.log("Selection: " + lastSelection + ": " + layoutParams);
-        console.log(" - margin: " + layoutParams.topMargin + " " + layoutParams.rightMargin + " " + layoutParams.bottomMargin + " " + layoutParams.leftMargin);
+    if (lastSelection) {
+        lastSelection.selected = "yes";
+        lastSelection.notify({ eventName: "selectedChange", object: lastSelection });
     }
 }
 
@@ -29,27 +30,27 @@ export function order({object}) {
     if (!lastSelection) {
         return;
     }
-    let value = object.text;
-    console.log("Set order " + value + " " + lastSelection);
-    flexbox.FlexboxLayout.setOrder(lastSelection, object.text);
+    let value = parseInt(object.text);
+    console.log("Set setOrder " + lastSelection + " " + value + " " + value + " " + (typeof value));
+    flexbox.FlexboxLayout.setOrder(lastSelection, value);
 }
 
 export function flexGrow({object}) {
     if (!lastSelection) {
         return;
     }
-    let value = object.text;
-    console.log("Set flexGrow " + value + " " + lastSelection);
-    flexbox.FlexboxLayout.setFlexGrow(lastSelection, object.text);
+    let value = parseInt(object.text);
+    console.log("Set setFlexGrow " + lastSelection + " " + value + " " + value + " " + (typeof value));
+    flexbox.FlexboxLayout.setFlexGrow(lastSelection, value);
 }
 
 export function flexShrink({object}) {
     if (!lastSelection) {
         return;
     }
-    let value = object.text;
-    console.log("Set flexShrink " + value + " " + lastSelection);
-    flexbox.FlexboxLayout.setFlexShrink(lastSelection, object.text);
+    let value = parseInt(object.text);
+    console.log("Set setFlexShrink " + lastSelection + " " + value + " " + value + " " + (typeof value));
+    flexbox.FlexboxLayout.setFlexShrink(lastSelection, value);
 }
 
 // TODO: Align self

@@ -87,8 +87,8 @@ export class FlexboxLayout extends FlexboxLayoutBase {
     private _flexLines: FlexLine[] = [];
     private _childrenFrozen: boolean[];
 
-    public FlexboxLayout() {
-        //
+    protected invalidate() {
+        this.requestLayout();
     }
 
     protected setNativeFlexDirection(flexDirection: FlexDirection) {
@@ -104,22 +104,6 @@ export class FlexboxLayout extends FlexboxLayoutBase {
         // lint happy no-op
     }
     protected setNativeAlignContent(alignContent: AlignContent) {
-        // lint happy no-op
-    }
-
-    protected onOrderPropertyChanged(element: View, oldValue: number, newValue: number): void {
-        // lint happy no-op
-    }
-    protected onFlexGrowPropertyChanged(element: View, oldValue: number, newValue: number): void {
-        // lint happy no-op
-    }
-    protected onFlexShrinkPropertyChanged(element: View, oldValue: number, newValue: number): void {
-        // lint happy no-op
-    }
-    protected onAlignSelfPropertyChanged(element: View, oldValue: AlignSelf, newValue: AlignSelf): void {
-        // lint happy no-op
-    }
-    protected onFlexWrapBeforePropertyChanged(element: View, oldValue: boolean, newValue: boolean): void {
         // lint happy no-op
     }
 
@@ -147,13 +131,19 @@ export class FlexboxLayout extends FlexboxLayoutBase {
             default:
                 throw new Error("Invalid value for the flex direction is set: " + this.flexDirection);
         }
+
+        this._childrenFrozen.length = 0;
     }
 
     private _getReorderedChildAt(index: number): View {
+        let child: View;
         if (index < 0 || index >= this._reorderedIndices.length) {
-            return null;
+            child = null;
+        } else {
+            let reorderedIndex = this._reorderedIndices[index];
+            child = this.getChildAt(reorderedIndex);
         }
-        return this.getChildAt(this._reorderedIndices[index]);
+        return child;
     }
 
     public addChild(child: View) {
@@ -202,7 +192,8 @@ export class FlexboxLayout extends FlexboxLayoutBase {
     }
 
     private _sortOrdersIntoReorderedIndices(childCount: number, orders: Order[]): number[] {
-        orders.sort(/* TODO: Orders... use the comparer? */);
+        
+        orders.sort((a, b) => a.compareTo(b));
         if (!this._orderCache) {
             this._orderCache = [];
         }
@@ -348,11 +339,11 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                     if (this.flexWrap !== FlexWrap.WRAP_REVERSE) {
                         let marginTop = flexLine._maxBaseline - FlexboxLayout.getBaseline(child);
                         marginTop = Math.max(marginTop, lp.topMargin);
-                        largestHeightInLine = Math.max(largestHeightInLine, child.height + marginTop + lp.bottomMargin);
+                        largestHeightInLine = Math.max(largestHeightInLine, child.getActualSize().height + marginTop + lp.bottomMargin);
                     } else {
                         let marginBottom = flexLine._maxBaseline - child.getMeasuredHeight() + FlexboxLayout.getBaseline(child);
                         marginBottom = Math.max(marginBottom, lp.bottomMargin);
-                        largestHeightInLine = Math.max(largestHeightInLine, child.height + lp.topMargin + marginBottom);
+                        largestHeightInLine = Math.max(largestHeightInLine, child.getActualSize().height + lp.topMargin + marginBottom);
                     }
                 }
                 flexLine._crossSize = largestHeightInLine;
